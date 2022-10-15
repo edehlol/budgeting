@@ -1,4 +1,4 @@
-import { Button, Card, Container, Group, Stack, Text } from "@mantine/core";
+import { Button, Card, Group, Stack, Text } from "@mantine/core";
 
 export default function DashboardPage() {
   return (
