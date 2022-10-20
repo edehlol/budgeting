@@ -9,7 +9,7 @@ interface Props {
 }
 
 export default function TransactionCard({ transaction }: Props) {
-  const { EXPENSE, INCOME } = TransactionType;
+  const { EXPENSE } = TransactionType;
   const [opened, setOpened] = useState(false);
 
   const { refetch } = useQuery(["transactions"], async () => {
