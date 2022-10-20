@@ -66,13 +66,10 @@ export default function TransactionCard({ transaction }: Props) {
           </div>
           <Text
             size="lg"
-            color={
-              transaction.type === TransactionType.EXPENSE ? "red" : "green"
-            }
+            color={transaction.type === "EXPENSE" ? "red" : "green"}
             weight={500}
           >
-            {transaction.type === TransactionType.EXPENSE ? "-" : "+"}{" "}
-            {transaction.amount}
+            {transaction.type === "EXPENSE" ? "-" : "+"} {transaction.amount}
           </Text>
         </Group>
       </Card>

@@ -11,7 +11,7 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { Transaction, TransactionType } from "@prisma/client";
+import { Transaction } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { GetServerSideProps } from "next";
@@ -96,7 +96,7 @@ export default function DashboardPage() {
                         )
                         .reduce(
                           (acc: number, t: Transaction) =>
-                            t.type === TransactionType.INCOME
+                            t.type === "INCOME"
                               ? acc + t.amount
                               : acc - t.amount,
                           0
