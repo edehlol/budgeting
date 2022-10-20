@@ -11,7 +11,7 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { Transaction } from "@prisma/client";
+import { Transaction, TransactionType } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { GetServerSideProps } from "next";
@@ -59,6 +59,7 @@ const TransactionModal = () => {
 };
 
 export default function DashboardPage() {
+  const { INCOME, EXPENSE } = TransactionType;
   const { data } = useQuery(["transactions"], async () => {
     const response = await fetch("/api/transaction");
     return response.json();
@@ -96,9 +97,7 @@ export default function DashboardPage() {
                         )
                         .reduce(
                           (acc: number, t: Transaction) =>
-                            t.type === "INCOME"
-                              ? acc + t.amount
-                              : acc - t.amount,
+                            t.type === INCOME ? acc + t.amount : acc - t.amount,
                           0
                         )}
                     </Text>
