@@ -1,5 +1,5 @@
 import { Button, Card, Group, Modal, Text } from "@mantine/core";
-import { Transaction, TransactionType } from "@prisma/client";
+import { Transaction } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import TransactionForm from "./TransactionForm";
