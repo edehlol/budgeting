@@ -7,24 +7,25 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { TransactionType } from "@prisma/client";
 
-interface FormValues {
-  type: string;
+export interface FormValues {
+  type: TransactionType;
   name: string;
   amount: number;
 }
 
 interface Props {
-  values: FormValues;
+  values?: FormValues;
   handleSubmit: (values: FormValues) => void;
 }
 
 export default function TransactionForm({ handleSubmit, values }: Props) {
   const form = useForm({
     initialValues: {
-      type: values.type || "expense",
-      name: values.name || "",
-      amount: values.amount || 0,
+      type: values?.type || TransactionType.EXPENSE,
+      name: values?.name || "",
+      amount: values?.amount || 0,
     },
   });
   return (
@@ -33,8 +34,8 @@ export default function TransactionForm({ handleSubmit, values }: Props) {
         <SegmentedControl
           {...form.getInputProps("type")}
           data={[
-            { label: "Expense", value: "expense" },
-            { label: "Income", value: "income" },
+            { label: "Expense", value: TransactionType.EXPENSE },
+            { label: "Income", value: TransactionType.INCOME },
           ]}
         />
         <TextInput {...form.getInputProps("name")} label="Name" />

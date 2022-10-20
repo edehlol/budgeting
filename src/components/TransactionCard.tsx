@@ -1,7 +1,6 @@
 import { Button, Card, Group, Modal, Text } from "@mantine/core";
-import { Transaction } from "@prisma/client";
+import { Transaction, TransactionType } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
 import { useState } from "react";
 import TransactionForm from "./TransactionForm";
 
@@ -64,16 +63,16 @@ export default function TransactionCard({ transaction }: Props) {
         <Group position="apart">
           <div>
             <Text>{transaction.name}</Text>
-            <Text size="sm" color="dimmed">
-              {dayjs(transaction.createdAt).format("DD MMM YYYY")}
-            </Text>
           </div>
           <Text
             size="lg"
-            color={transaction.type === "expense" ? "red" : "green"}
+            color={
+              transaction.type === TransactionType.EXPENSE ? "red" : "green"
+            }
             weight={500}
           >
-            {transaction.type === "expense" ? "-" : "+"} {transaction.amount}
+            {transaction.type === TransactionType.EXPENSE ? "-" : "+"}{" "}
+            {transaction.amount}
           </Text>
         </Group>
       </Card>
