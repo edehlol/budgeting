@@ -1,6 +1,7 @@
 import {
   Button,
   Card,
+  Divider,
   Group,
   Modal,
   NumberInput,
@@ -9,12 +10,15 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
-import { useForm } from "@mantine/form";
-import { useToggle } from "@mantine/hooks";
-import { Transaction } from "@prisma/client";
+import { Transaction, TransactionType } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
+import { GetServerSideProps } from "next";
+import { unstable_getServerSession } from "next-auth";
 import { useState } from "react";
 import TransactionCard from "../components/TransactionCard";
+import TransactionForm, { FormValues } from "../components/TransactionForm";
+import { authOptions } from "./api/auth/[...nextauth]";
 
 const TransactionModal = () => {
   const { refetch } = useQuery(["transactions"], async () => {
@@ -22,19 +26,12 @@ const TransactionModal = () => {
     return response.json();
   });
   const [opened, setOpened] = useState(false);
-  const form = useForm({
-    initialValues: {
-      type: "expense",
-      name: "",
-      amount: 0,
-    },
-  });
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (values: FormValues) => {
     const body = {
-      type: form.values.type,
-      name: form.values.name,
-      amount: form.values.amount,
+      type: values.type,
+      name: values.name,
+      amount: values.amount,
     };
     const response = await fetch("/api/transaction", {
       method: "POST",
@@ -53,26 +50,7 @@ const TransactionModal = () => {
         onClose={() => setOpened(false)}
         title="New Transaction"
       >
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-          <Stack>
-            <SegmentedControl
-              {...form.getInputProps("type")}
-              data={[
-                { label: "Expense", value: "expense" },
-                { label: "Income", value: "income" },
-              ]}
-            />
-            <TextInput {...form.getInputProps("name")} label="Name" />
-            <NumberInput
-              {...form.getInputProps("amount")}
-              label="Amount"
-              min={0}
-            />
-            <Group position="right">
-              <Button type="submit">Add</Button>
-            </Group>
-          </Stack>
-        </form>
+        <TransactionForm handleSubmit={handleSubmit} />
       </Modal>
       <Button onClick={() => setOpened(true)}>Add Transaction</Button>
     </>
@@ -80,11 +58,13 @@ const TransactionModal = () => {
 };
 
 export default function DashboardPage() {
+  const { INCOME, EXPENSE } = TransactionType;
   const { data } = useQuery(["transactions"], async () => {
     const response = await fetch("/api/transaction");
     return response.json();
   });
   console.log(data);
+
   return (
     <>
       <h1>Dashboard</h1>
@@ -93,10 +73,60 @@ export default function DashboardPage() {
           <TransactionModal />
         </Group>
 
-        {data?.map((transaction: Transaction, index: number) => (
-          <TransactionCard transaction={transaction} key={index} />
-        ))}
+        {data?.length > 0 &&
+          data?.map((transaction: Transaction, index: number) => (
+            <>
+              {index === 0 ||
+              dayjs(transaction.createdAt).isBefore(
+                dayjs(data[index - 1].createdAt),
+                "day"
+              ) ? (
+                <div>
+                  <Group position="apart">
+                    <Text color="dimmed" size="sm">
+                      {dayjs(transaction.createdAt).format("MMM DD")}
+                    </Text>
+
+                    <Text color="dimmed" size="sm">
+                      {data
+                        .filter(
+                          (t: Transaction) =>
+                            dayjs(t.createdAt).format("YYYY-MM-DD") ===
+                            dayjs(transaction.createdAt).format("YYYY-MM-DD")
+                        )
+                        .reduce(
+                          (acc: number, t: Transaction) =>
+                            t.type === INCOME ? acc + t.amount : acc - t.amount,
+                          0
+                        )}
+                    </Text>
+                  </Group>
+                  <Divider mt="sm" />
+                </div>
+              ) : null}
+              <TransactionCard key={index} transaction={transaction} />
+            </>
+          ))}
       </Stack>
     </>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const session = await unstable_getServerSession(
+    ctx.req,
+    ctx.res,
+    authOptions
+  );
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+  return {
+    props: {},
+  };
+};

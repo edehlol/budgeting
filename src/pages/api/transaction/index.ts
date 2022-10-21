@@ -24,6 +24,7 @@ export default async function handler(
     if (req.method === "GET") {
       const getTransactions = await prisma.transaction.findMany({
         where: { user: { email: session.user?.email as string } },
+        orderBy: { createdAt: "desc" },
       });
       res.json(getTransactions);
     }
